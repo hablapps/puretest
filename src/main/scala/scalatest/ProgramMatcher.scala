@@ -2,7 +2,7 @@ package org.hablapps.puretest
 
 import org.scalatest._, matchers._, Matchers._
 
-/** 
+/**
  * Program matcher
  */
 trait ProgramMatchers[P[_]]{
@@ -27,10 +27,9 @@ object ProgramMatchers{
           val evaluated = test(program)
           MatchResult(
             evaluated.fold(_ => false, identity),
-            "fail msg",
-            "success msg")
+            evaluated.fold(_.toString, r => "should not happen"),
+            evaluated.fold(_.toString, r => "should not happen"))
         }
       }
     }
 }
-    
