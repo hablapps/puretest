@@ -15,17 +15,16 @@ trait TestingOps{
         error: E => (error == e).point[P]
       }
 
-    // def assertError[E: MonadError[P,?]](e: E)(implicit E: String => E): P[Unit] =
-    //   isError(e).ifM(
-    //     ().point[P],
-    //     raiseError(.handleError{
-    //     error: E => (error == e).point[P]
-    //   }
+    def error[E: MonadError[P,?]]: P[Either[E,A]] = 
+      (self map (Right(_): Either[E,A])).handleError{
+        _.point[P] map Left.apply[E,A]
+      }
 
     import scalaz.Functor
 
     def isEqual(a: A)(implicit F: Functor[P]): P[Boolean] =
       F.map(self)(_ == a)
+
   }
 }
 

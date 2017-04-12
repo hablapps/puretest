@@ -8,8 +8,7 @@ import puretest.{Filter => TestFilter}, scalatestImpl._
 trait SpecScalatest[P[_]] extends Spec[P]{ self : FunSpec with Matchers =>
 
   implicit val Te: StateTester[P,Int,Throwable]
-  implicit val ME: scalaz.MonadError[P,Throwable]
-
+  
   // Tests
 
   import ProgramStateMatchers.Syntax._
@@ -49,6 +48,10 @@ trait SpecScalatest[P[_]] extends Spec[P]{ self : FunSpec with Matchers =>
     it("should work for failing programs with explicit raised errors"){
       raisedErrorBoolProgram should not(runWithoutErrors(from = 0))
       raisedErrorProgram should not(runWithoutErrors(from = 0))
+    }
+
+    it("should work for failing programs with handled errors"){
+      failingProgramWithHandledError should runWithoutErrors(from = 0)
     }
   }
 }

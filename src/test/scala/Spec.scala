@@ -3,7 +3,9 @@ package test
 
 trait Spec[P[_]]{
 
-  implicit val MS: scalaz.MonadState[P,Int]
+  val MS: scalaz.MonadState[P,Int]
+  implicit val ME: scalaz.MonadError[P,Throwable]
+
   implicit val Fi: Filter[P]
 
   import scalaz.syntax.monad._, Filter.Syntax._
@@ -33,15 +35,20 @@ trait Spec[P[_]]{
     2 <- MS.get
   } yield ()
 
-  /* Failing programs with explicit raised errors */
+  /* Failing and working programs with explicit raised errors */
   
   import scalaz.MonadError
 
-  def raisedErrorBoolProgram(
-    implicit ME: MonadError[P,Throwable]): P[Boolean] = 
+  def raisedErrorBoolProgram: P[Boolean] = 
     ME.raiseError(new RuntimeException("forced exception"))
 
-  def raisedErrorProgram(
-    implicit ME: MonadError[P,Throwable]): P[Unit] = 
+  def raisedErrorProgram: P[Unit] = 
     ME.raiseError(new RuntimeException("forced exception"))
+
+  case class Error1(i: Int) extends Throwable
+
+  def failingProgramWithHandledError: P[Unit] = 
+    for {
+      Left(Error1(1)) <- ME.raiseError[Unit](Error1(1)).error
+    } yield ()
 }
