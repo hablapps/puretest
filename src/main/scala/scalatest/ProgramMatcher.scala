@@ -17,7 +17,7 @@ object ProgramMatchers{
   trait Syntax{
     def beSatisfied[P[_]](implicit S1: ProgramMatchers[P]) =
       S1.beSatisfied
-    def runWithoutErrors[P[_]](implicit PM: ProgramMatchers[P]) = 
+    def runWithoutErrors[P[_]](implicit PM: ProgramMatchers[P]) =
       PM.runWithoutErrors
   }
 
@@ -33,10 +33,10 @@ object ProgramMatchers{
           MatchResult(
             evaluated.fold(_ => false, identity),
             evaluated.fold(
-              error => s"Unexpected error $error", 
+              error => s"Unexpected error $error",
               _ => "Boolean program returned false"),
             evaluated.fold(
-              _ => "should not happen", 
+              _ => "should not happen",
               _ => s"Boolean program returned true"))
         }
       }
@@ -47,11 +47,12 @@ object ProgramMatchers{
           MatchResult(
             evaluated.isRight,
             evaluated.fold(
-              _.toString, 
+              { case e: Throwable => "Unexpected exception " + e.toString + "\n" + e.getStackTrace.mkString("\n")
+                case e => "Unexpected exception " + e.toString },
               _ => "should not happen"),
             evaluated.fold(
-              _ => "should not happen", 
-              result => s"Unexpected returned value $result"))  
+              _ => "should not happen",
+              result => s"Unexpected returned value $result"))
         }
       }
     }

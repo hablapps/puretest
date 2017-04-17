@@ -17,10 +17,10 @@ trait Spec[P[_]]{
     1 <- MS.get
   } yield true
 
-  def falseProgram: P[Boolean] = 
+  def falseProgram: P[Boolean] =
     false.point[P]
 
-  def workingProgram: P[Unit] = 
+  def workingProgram: P[Unit] =
     ().point[P]
 
   /* Boolean program that fails in pattern matching */
@@ -36,18 +36,18 @@ trait Spec[P[_]]{
   } yield ()
 
   /* Failing and working programs with explicit raised errors */
-  
+
   import scalaz.MonadError
 
-  def raisedErrorBoolProgram: P[Boolean] = 
+  def raisedErrorBoolProgram: P[Boolean] =
     ME.raiseError(new RuntimeException("forced exception"))
 
-  def raisedErrorProgram: P[Unit] = 
+  def raisedErrorProgram: P[Unit] =
     ME.raiseError(new RuntimeException("forced exception"))
 
   case class Error1(i: Int) extends Throwable
 
-  def failingProgramWithHandledError: P[Unit] = 
+  def failingProgramWithHandledError: P[Unit] =
     for {
       Left(Error1(1)) <- ME.raiseError[Unit](Error1(1)).error
     } yield ()
