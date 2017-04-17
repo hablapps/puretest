@@ -27,6 +27,18 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "sourcecode" % "0.1.3"
 )
 
+publishTo <<= version { v =>
+  import java.io.File
+  val privateKeyFile: File = new File(sys.env("HOME") + "/.ssh/hablaweb.pem")
+  Some(Resolver.sftp(
+    "HABLA",
+    "repo.hablapps.com",
+    "/var/www/repo/html/" + (
+      if (v.trim.endsWith("SNAPSHOT")) { "snapshots" } else { "releases" }
+    )
+  ) as("ubuntu", privateKeyFile))
+}
+
 // dependencyOverrides += "org.scalaz" %% "scalaz-core" % "7.2.7-HABLAPPS"
 
 scalacOptions ++= Seq(
