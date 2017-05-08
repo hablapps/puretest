@@ -2,9 +2,9 @@ package org.hablapps.puretest
 
 import scalaz.{\/, ~>}
 
-/** 
+/**
  * Testers
- */ 
+ */
 trait Tester[P[_],E] extends (P~> (E \/ ?))
 
 object Tester{
@@ -12,7 +12,7 @@ object Tester{
 
   /* Testing either programs */
 
-  implicit def eitherTester[E]: Tester[E \/ ?, E] = 
+  implicit def eitherTester[E]: Tester[E \/ ?, E] =
     new Tester[E \/ ?,E]{
       def apply[X](e: E \/ X) = e
     }
@@ -21,11 +21,14 @@ object Tester{
 
   import scala.concurrent.{Await, Future, duration}, duration._
   import scala.util.Try, scalaz.syntax.std.`try`._
+  import scala.util.{Success, Failure}
 
-  implicit def futureTester: Tester[Future, Throwable] = 
+  implicit def futureTester: Tester[Future, Throwable] =
     new Tester[Future,Throwable]{
       def apply[X](f: Future[X]) =
-        Try(Await.result(f, 20 second))
-          .toDisjunction
+        (Try(Await.result(f, 60 second)) match {
+          case s@Success(_) => s
+          case f@Failure(t) => t.printStackTrace ; f
+        }).toDisjunction
     }
 }

@@ -15,7 +15,7 @@ trait TestingOps{
         error: E => (error == e).point[P]
       }
 
-    def error[E: MonadError[P,?]]: P[Either[E,A]] = 
+    def error[E: MonadError[P,?]]: P[Either[E,A]] =
       (self map (Right(_): Either[E,A])).handleError{
         _.point[P] map Left.apply[E,A]
       }
