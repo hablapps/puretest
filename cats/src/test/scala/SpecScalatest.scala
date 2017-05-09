@@ -3,55 +3,55 @@ package puretest
 package test
 
 import org.scalatest._
-import puretest.{Filter => TestFilter}, scalatestImpl._
+import puretest.{Filter => TestFilter}
 
 trait SpecScalatest[P[_]] extends Spec[P]{ self : FunSpec with Matchers =>
 
   implicit val Te: StateTester[P,Int,Throwable]
-  
+
   // Tests
 
   import ProgramStateMatchers.Syntax._
 
   describe("beSatisfied for Boolean program"){
-    
+
     it("should work for working programs returning true"){
-      trueProgram should beSatisfied(from = 0)
+      trueProgram should from(0).beSatisfied
     }
 
     it("should work for working programs returning false"){
-      falseProgram should not(beSatisfied(from = 0))
+      falseProgram should not(from(0).beSatisfied)
     }
 
     it("should work for failing programs at pattern matching"){
-      failingMatchBoolProgram should not(beSatisfied(from = 0))
+      failingMatchBoolProgram should not(from(0).beSatisfied)
     }
 
     it("should work for failing programs with explicit raised errors"){
-      raisedErrorBoolProgram should not(beSatisfied(from = 0))
+      raisedErrorBoolProgram should not(from(0).beSatisfied)
     }
   }
 
   describe("runWithoutErrors"){
 
     it("should work for working programs"){
-      trueProgram should runWithoutErrors(from = 0)
-      falseProgram should runWithoutErrors(from = 0)
-      workingProgram should runWithoutErrors(from = 0)
+      trueProgram should from(0).runWithoutErrors
+      falseProgram should from(0).runWithoutErrors
+      workingProgram should from(0).runWithoutErrors
     }
 
     it("should work for failing programs at pattern matching"){
-      failingMatchBoolProgram should not(runWithoutErrors(from = 0))
-      failingMatchProgram should not(runWithoutErrors(from = 0))
+      failingMatchBoolProgram should not(from(0).runWithoutErrors)
+      failingMatchProgram should not(from(0).runWithoutErrors)
     }
 
     it("should work for failing programs with explicit raised errors"){
-      raisedErrorBoolProgram should not(runWithoutErrors(from = 0))
-      raisedErrorProgram should not(runWithoutErrors(from = 0))
+      raisedErrorBoolProgram should not(from(0).runWithoutErrors)
+      raisedErrorProgram should not(from(0).runWithoutErrors)
     }
 
     it("should work for failing programs with handled errors"){
-      failingProgramWithHandledError should runWithoutErrors(from = 0)
+      failingProgramWithHandledError should from(0).runWithoutErrors
     }
   }
 }

@@ -1,28 +1,38 @@
 package org.hablapps.puretest
-package scalatestImpl
 
 import org.scalatest._, matchers._, Matchers._
 
-trait ProgramStateMatchers[P[_],S]{
-  def apply(from: S): ProgramMatchers[P]
+trait ProgramStateMatchers[P[_], S, E]{
+  def apply(from: S): ProgramMatchers[P, E]
 }
 
 object ProgramStateMatchers{
+  def apply[P[_], S, E](implicit PSM: ProgramStateMatchers[P, S, E]) = PSM
 
-  def apply[P[_],S](implicit PM: ProgramStateMatchers[P,S]) = PM
+  class FromBuilder[P[_], S](from: S) {
+    def failWith[E](error: E)(implicit PSM: ProgramStateMatchers[P, S, E]) =
+      PSM(from).failWith(error)
+    def beEqualTo[A](value: A)(implicit PSM: ProgramStateMatchers[P, S, _]) =
+      PSM(from).beEqualTo(value)
+    def beSatisfied(implicit PSM: ProgramStateMatchers[P, S, _]) =
+      PSM(from).beSatisfied
+    def runWithoutErrors(implicit PSM: ProgramStateMatchers[P, S, _]) =
+      PSM(from).runWithoutErrors
+  }
+
+  trait FromAux[P[_]] {
+    def apply[S](from: S) = new FromBuilder[P, S](from)
+  }
 
   trait Syntax{
-    def beSatisfied[P[_],S](from: S)(implicit S1: ProgramStateMatchers[P,S]) =
-      S1(from).beSatisfied
-    def runWithoutErrors[P[_],S](from: S)(implicit PM: ProgramStateMatchers[P,S]) = 
-      PM(from).runWithoutErrors
+    def from[P[_]] = new FromAux[P] {}
   }
 
   object Syntax extends Syntax
 
-  implicit def matcher[P[_], S, E](implicit tester: StateTester[P,S,E]) =
-    new ProgramStateMatchers[P,S]{
-      def apply(from: S) = 
+  implicit def matcher[P[_], S, E](implicit tester: StateTester[P, S, E]) =
+    new ProgramStateMatchers[P, S, E]{
+      def apply(from: S) =
         ProgramMatchers.matcher(tester(from))
     }
 }

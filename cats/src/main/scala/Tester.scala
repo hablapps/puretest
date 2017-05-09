@@ -34,4 +34,46 @@ object Tester{
           case Success(s) => Right(s)
         }
     }
+
+  /* Validated programs */
+
+  import cats.data.Validated
+
+  implicit def validatedTester[E]: Tester[Validated[E, ?], E] =
+    new Tester[Validated[E, ?], E] {
+      def apply[A](fa: Validated[E, A]): Either[E, A] = fa.toEither
+    }
+
+  /* Composing testers */
+
+  implicit def composedTester[F[_], G[_], E](implicit
+      F: Tester[F, E],
+      G: Tester[G, E]): Tester[λ[α => F[G[α]]], E] =
+    new Tester[λ[α => F[G[α]]], E] {
+      def apply[A](fa: F[G[A]]): Either[E, A] =
+        F(fa).right.flatMap(G.apply)
+    }
+
+  def composedTesterOuter[F[_], G[_], EF, EG](f: EG => EF)(implicit
+      F: Tester[F, EF],
+      G: Tester[G, EG]): Tester[λ[α => F[G[α]]], EF] =
+    new Tester[λ[α => F[G[α]]], EF] {
+      def apply[A](fa: F[G[A]]): Either[EF, A] =
+        F(fa).right flatMap { ga =>
+          G(ga).fold(
+            f andThen Left.apply,
+            Right.apply)
+        }
+    }
+
+  def composedTesterInner[F[_], G[_], EF, EG](f: EF => EG)(implicit
+      F: Tester[F, EF],
+      G: Tester[G, EG]): Tester[λ[α => F[G[α]]], EG] =
+    new Tester[λ[α => F[G[α]]], EG] {
+      def apply[A](fa: F[G[A]]): Either[EG, A] =
+        F(fa).fold(
+          f andThen Left.apply,
+          G.apply)
+    }
+
 }
