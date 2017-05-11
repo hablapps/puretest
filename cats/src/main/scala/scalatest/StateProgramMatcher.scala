@@ -1,4 +1,5 @@
 package org.hablapps.puretest
+package scalatestImpl
 
 import org.scalatest._, matchers._, Matchers._
 
