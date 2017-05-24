@@ -8,6 +8,7 @@ lazy val commonSettings = Seq(
   // addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full),
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.0",
+    "org.scalacheck" %% "scalacheck" % "1.13.4",
     "com.lihaoyi" %% "sourcecode" % "0.1.3"),
   resolvers ++= Seq(
     "Speech repo - releases" at "http://repo.hablapps.com/releases"),
