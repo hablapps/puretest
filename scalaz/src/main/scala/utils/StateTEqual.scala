@@ -21,7 +21,7 @@ trait StateTEqual0 {
       eq1: Equal[S],
       eq2: Equal[A],
       eq3: Equal[F[(S, A)]]): Equal[StateT[F, S, A]] =
-    Equal[StateT[F, S, A]] { (st1, st2) =>
+    Equal.equal[StateT[F, S, A]] { (st1, st2) =>
       Gen.listOfN(50, as.arbitrary).sample
         .getOrElse(sys.error("could not generate arbitrary list of init states"))
         .forall(s => st1(s) === st2(s))
