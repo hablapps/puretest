@@ -36,7 +36,7 @@ lazy val commonSettings = Seq(
   )
 
 lazy val root = (project in file("."))
-  .aggregate(cats, scalaz)
+  .aggregate(cats, scalaz, tictactoe)
   .settings(
     commonSettings,
     publish := { },
@@ -57,3 +57,8 @@ lazy val scalaz = project
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % "7.2.9"
     ))
+
+lazy val tictactoe = (project in file("examples/tictactoe"))
+  .dependsOn(cats)
+  .settings(commonSettings,
+    name := "tictactoe-example")

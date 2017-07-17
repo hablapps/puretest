@@ -6,7 +6,7 @@ import cats.{MonadError, MonadState}
 import cats.data.StateT
 import cats.implicits._
 import org.scalatest._
-import puretest.{Filter => TestFilter}, scalatestImpl._
+import puretest.{Filter => TestFilter}
 
 import SpecScalatestStateT.Program
 
