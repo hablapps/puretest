@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "org.hablapps",
-  version := "0.2-SNAPSHOT",
+  version := "0.3-SNAPSHOT",
   scalaVersion := "2.12.0",
   scalaOrganization := "org.typelevel",
   crossScalaVersions := Seq("2.11.8", "2.12.0"),
@@ -60,5 +60,8 @@ lazy val scalaz = project
 
 lazy val tictactoe = (project in file("examples/tictactoe"))
   .dependsOn(cats)
-  .settings(commonSettings,
-    name := "tictactoe-example")
+  .settings(
+    commonSettings,
+    name := "tictactoe-example",
+    publish := { },
+    publishLocal := { })
