@@ -3,7 +3,7 @@ package puretest
 package test
 
 import org.scalatest._
-import puretest.{Filter => TestFilter}, scalatestImpl._
+import puretest.{Filter => TestFilter}
 
 trait SpecScalatest[P[_]] extends Spec[P]{ self : FunSpec with Matchers =>
 
