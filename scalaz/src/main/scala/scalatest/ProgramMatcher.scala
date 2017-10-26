@@ -1,6 +1,7 @@
 package org.hablapps.puretest
+package scalatestImpl
 
-import org.scalatest._, matchers._, Matchers._
+import org.scalatest._, matchers._
 
 /**
  * Program matcher
@@ -23,27 +24,20 @@ object ProgramMatchers{
 
   object Syntax extends Syntax
 
-  implicit def matcher[P[_], E](implicit test: Tester[P,E]) =
+  implicit def matcher[P[_], E](implicit test: Tester[P, E]) =
     new ProgramMatchers[P]{
-      import scalaz.\/
 
       def beSatisfied = new Matcher[P[Boolean]]{
         def apply(program: P[Boolean]) =
           test(program).fold(
-            error => MatchResult(false, s"Unexpected error $error", "should not happen"),
+            error => MatchResult(false, s"$error", "should not happen"),
             b => MatchResult(b, "Boolean program returned false", "Boolean program returned true"))
       }
 
       def runWithoutErrors = new Matcher[P[_]]{
         def apply(program: P[_]) =
           test(program).fold(
-            error => {
-              val msg = error match { // TODO: This is ugly
-                case e: Throwable => s"Unexpected exception $e\n" + e.getStackTrace.mkString("\n")
-                case e => s"Unexpected exception $e"
-              }
-              MatchResult(false, msg, "should not happen")
-            },
+            error => MatchResult(false, error.toString, "should not happen"),
             result => MatchResult(true, "should not happen", s"Program ran w/o errors: $result"))
       }
     }

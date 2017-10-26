@@ -7,7 +7,7 @@ import cats.implicits._
 
 trait StateValidatedMonad{
 
-  implicit def StateValidatedMonad[E: Semigroup, S]: Monad[λ[α => State[S, Validated[E, α]]]] =
+  implicit def stateValidatedMonad[E: Semigroup, S]: Monad[λ[α => State[S, Validated[E, α]]]] =
     new Monad[λ[α=>State[S,Validated[E,α]]]]{
 
       def pure[A](a: A) =

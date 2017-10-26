@@ -1,8 +1,8 @@
 package org.hablapps.puretest
 
-trait StateTMonadError{
+import scalaz.{MonadError, StateT, IndexedStateT}
 
-  import scalaz.{MonadError, StateT, IndexedStateT}
+trait StateTMonadError{
 
   implicit def stateTMonadError[S, F[_], E](implicit F: MonadError[F, E]) =
     new MonadError[StateT[F, S, ?], E]{
@@ -14,7 +14,8 @@ trait StateTMonadError{
         StateT(s => F.point(s, aa.value))
       }
 
-      def bind[A, B](fa: StateT[F, S, A])(f: A => StateT[F, S, B]): StateT[F, S, B] = fa.flatMap(f)
+      def bind[A, B](fa: StateT[F, S, A])(f: A => StateT[F, S, B]): StateT[F, S, B] =
+        fa.flatMap(f)
 
       def raiseError[A](e: E): StateT[F,S,A] =
         IndexedStateT(_ => F.raiseError(e))

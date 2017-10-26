@@ -1,10 +1,12 @@
-package org.hablapps.puretest.examples.tictactoe
+package org.hablapps.puretest
+package examples.tictactoe
 
 import TicTacToe._
 
-import cats.data.StateT
 import cats.MonadError
-import cats.implicits._
+import cats.data.StateT
+import cats.instances.either._
+import cats.syntax.all._
 
 case class BoardState(
   board: Vector[Vector[Option[Stone]]],
@@ -14,7 +16,7 @@ object BoardState {
 
   /* Auxiliary types */
 
-  type Program[T] = StateT[Either[Error, ?], BoardState, T]
+  type Program[T] = StateT[Either[PuretestError[Error], ?], BoardState, T]
 
   /* Auxiliary values */
 
@@ -28,12 +30,13 @@ object BoardState {
 
     /* Evidences */
 
-    val ME = MonadError[Program, TicTacToe.Error]
+    val ME: MonadError[Program, Error] = PuretestError.toMonadError
 
-    /* Observers and transformers */
     import StateT._
 
-    def reset(): Program[Unit] =
+    /* Transformers */
+
+    def reset: Program[Unit] =
       set(empty)
 
     def place(stone: Stone, position: Position): Program[Unit] =
@@ -43,11 +46,13 @@ object BoardState {
       setStone(position, stone) >>
       setTurn(stone.opponent)
 
+    /* Observers */
+
     def in(position: Position): Program[Option[Stone]] =
       checkOutsideBoard(position) >>
       inspect(_.board(position._1)(position._2))
 
-    def turn(): Program[Option[Stone]] =
+    def turn: Program[Option[Stone]] =
       gameInProgress.ifThenOpt(inspect(_.turn))
 
     def win(stone: Stone): Program[Boolean] =
@@ -85,8 +90,8 @@ object BoardState {
     /* Auxiliary methods */
 
     private def checkOutsideBoard(position: Position): Program[Unit] =
-      if (position._1 < 0 || position._1 >= 3 &&
-          position._2 < 0 || position._2 >= 3)
+      if (position._1 < 0 || position._1 > 2 &&
+          position._2 < 0 || position._2 > 2)
         ME.raiseError(NotInTheBoard(position))
       else
         ().pure[Program]
@@ -111,11 +116,11 @@ object BoardState {
       modify(_.copy(turn = _turn))
 
     private def gameInProgress: Program[Boolean] =
-      winner().map(_.isEmpty)
+      winner.map(_.isEmpty)
 
     private def checkGameInProgress: Program[Unit] =
-      winner().map(_.isDefined)
-        .ifThen(ME.raiseError(GameOver()))
+      winner.map(_.isDefined)
+        .ifThen(ME.raiseError(GameOver))
 
   }
 }

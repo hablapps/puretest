@@ -10,6 +10,13 @@ trait Tester[P[_], E] extends (P ~> Either[E, ?])
 object Tester{
   def apply[P[_], E](implicit T: Tester[P, E]) = T
 
+  /* Testing Option programs */
+
+  implicit def optionTester: Tester[Option, Unit] =
+    new Tester[Option, Unit]{
+      def apply[X](e: Option[X]) = e.fold(Left(()): Either[Unit,X])(Right.apply)
+    }
+
   /* Testing either programs */
 
   implicit def eitherTester[E]: Tester[Either[E, ?], E] =
