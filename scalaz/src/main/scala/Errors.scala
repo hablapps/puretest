@@ -14,7 +14,10 @@ object PuretestError {
 
   def simplifyLocation(location: Location): String = {
     val fileext = raw".*/(.*)".r
-    val fileext(filename) = location._1.value
+    val filename = location._1.value match {
+      case fileext(name) => name
+      case other => other
+    }
     s"($filename:${location._2.value})"
   }
 
