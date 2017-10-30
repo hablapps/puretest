@@ -1,54 +1,114 @@
-# Puretest
 
-Utilities for testing purely functional programs.
+[comment]: # (Start Badges)
 
-### Introduction
+[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/hablapps/puretest/master/LICENSE)
+[![Join the chat at https://gitter.im/hablapps/puretest](https://badges.gitter.im/hablapps/puretest.svg)](https://gitter.im/hablapps/puretest?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Puretest is a library that aims to write purely functional tests for purely functional programs. In other words, it doesn't matter the specific program we are dealing with, it could be any program `P[_]`, Puretest will let us write tests for that program. To finally run the tests, the programs must satisfy a minimum set of conditions. But let's stop the technical words and take a deeper look at what Puretest is able to do.
+[comment]: # (End Badges)
 
-#### Dependencies
+# Overview
 
-To add **Puretest** to your project and start using it, you just need to add one of the following dependencies. Depending on your preferences, you can choose to use our **Cats** or **Scalaz** module. Each one has custom instances for some of the types of the correspondent library.
+Puretest allows you to write purely functional tests for purely functional programs. Purely functional tests have two major advantages:
+* They can be fully reused both for unit and integration testing scenarios
+* They abstract away from Scalatest, Specs2, uTest and any other testing framework
+
+# Getting started
+
+To add Puretest to your project and start using it, you just need to add our resolver and the **cats** or **scalaz** dependency, according to your preferences.
 
 ```scala
 resolvers += "Habla repo - releases" at "http://repo.hablapps.com/releases"
 
-libraryDependencies += "org.hablapps" %% "puretest-cats" % "0.2"
-libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.2"
+libraryDependencies += "org.hablapps" %% "puretest-cats" % "0.3.1"
+libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.3.1"
 ```
 
-### Abstract testing: Property matchers
+# Purely functional matchers
 
-Puretest matchers are just transformations on our programs, they turn any program into a predicate program, that will return true or false whether the predicate holds or not. There are mainly two matchers so far, which are:
+Matchers from conventional testing frameworks typically execute a given program and then checks whether the execution meets a given condition. If the condition is not met, then the matcher fails and an exception is thrown. Purely functional matchers work similarly, but in a more declarative fashion.
 
-* **`isEqual`**, matches the result of executing a program `P[A]` against a given value `A`
-* **`isError`**, checks that the program `P[A]` exited with the given error `E`
-
-During the following examples we're going to use `Either[String, ?]` as our programs, and we'll define some helper methods to alleviate boilerplate. This is a very naive example though, a more real use case can be found in our [TicTacToe example](examples/tictactoe)
+For instance, the following test checks that the given program returns successfully the value `1`:
 
 ```scala
-type P[A] = Either[String, A]
-def left[A](e: String): P[A] = Left(e)
-def right[A](a: A): P[A] = Right(a)
+// The scalaz or cats dependencies are assumed to be in scope
+import org.hablapps.puretest._
+
+def testOne[P[_]: HandleError[?[_],Throwable]
+                : RaiseError[?[_],PuretestError[Throwable]]
+                : Monad](program: P[Int]): P[Int] =
+  program shouldBe 1
 ```
 
-Well, we are ready to see some examples of the matchers we can use with puretest:
+This test will pass if `program` actually executed without errors and the integer value returned is exactly `1`. If the program returned a different value, or it simply failed, then the test will fail as well and a testing error will be raised. This desired functionality is possible thanks to the following capabilities declared in the signature:
+* `HandleError[P,Throwable]`. It allows us to check wether the program failed or not. In this particular case, we assume that the application program fails with an error of type `Throwable`, but it could be any type you want.
+* `RaiseError[P,PuretestError[Throwable]]`. It allows us to raise a testing error in case that the test doesn't pass. The argument of `PuretestError` refers to the type of error of the program being tested.
+
+`HandleError` and `RaiseError` are type classes which simply provide the corresponding operations of `MonadError`. The required evidences of these type classes can be obtained automatically from `MonadError[P,PuretestError[Throwable]]`.
+
+For instance, if programs are to be interpreted as `Either` values, we may obtain the following outcomes:
+```scala
+scala> type P[t] = Either[PuretestError[Throwable],t]
+defined type alias P
+
+scala> testOne(1.point[P])
+res0: P[Int] = Right(1)
+
+scala> testOne(0.point[P])
+res1: P[Int] = Left(Value 1 expected but found value 0 (<console>:18))
+
+scala> testOne((new Throwable()).raiseError[P,Int])
+res2: P[Int] = Left(Value 1 expected but found error java.lang.Throwable (<console>:18))
+```
+
+Besides `shouldBe`, there are a number of other functional matchers. This is the complete list:
+
+Matcher | Description
+--- | ---
+shouldSucceed[E] | Program executes without errors of type `E`
+shouldBe[E](value: A) | Program returns successfully the specified `value`
+shouldBe[E](pattern: A => Boolean) | Program returns successfully a value that match the specified pattern
+shouldFail[E] | Program fails with an error of type E
+shouldFailWith[E](error: E) | Program fails exactly with `error`
+shouldFailWith[E](pattern: E) | Program fails and the error matches the specified pattern
+
+# Specification-style tests
+
+We can group and describe tests in a BDD style using the trait `FunSpec[P[_]]`.
+Basically, this trait gives us the possibility to assign textual descriptions to tests
+as follows:
 
 ```scala
 import org.hablapps.puretest._
 
-// With `isEqual` we check that the program returned a successful value `5`
-right(5) isEqual 5 : P[Boolean] // true
-right(4) isEqual 5 : P[Boolean] // false
-left("Oops!") isEqual 5 : P[Boolean] // false
-// right(true) isEqual 5 // Doesn't compile
+trait Test[P[_]] extends FunSpec[P]{
 
-// With `isError` we check that the program exited with a failure, `"Oops!"`
-left("Oops!") isError "Oops!" : P[Boolean] // true
-left("Oops!") isError "ERROR!" : P[Boolean] // false
-right(5) isError "Oops!" : P[Boolean] // false
+  implicit val ME: MonadError[P,Throwable]
+  implicit val RE: RaiseError[P,PuretestError[Throwable]]
+  implicit val M: Monad[P]
+
+  Describe("Working program"){
+    It("should succeed"){
+      1.point[P] shouldSucceed
+    }
+
+    It("should succeed with the specific value"){
+      1.point[P] shouldBe 1
+    }
+  }
+
+  Describe("Failing program"){
+    It("should fail"){
+      (new Throwable()).raiseError[P,Int] shouldFail
+    }
+
+    It("should fail with the thrown error"){
+      (new Throwable("error")).raiseError[P,Int] shouldMatchFailure[Throwable]{
+        case t if t.getMessage == "error" => true
+      }
+    }
+  }
+}
 ```
-
 ### ScalaTest binding
 
 Once we have our properties defined in an abstract way, the next step is to run them for a concrete test suite. So far we just have ScalaTest binding but it is important to point out that bindings for other libraries (Specs2, Scalacheck, ...) are also possible and will be provided in future versions. This is a simple example of test definition:

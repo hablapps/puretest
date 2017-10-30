@@ -50,7 +50,7 @@ trait WorkingSpec[P[_]] extends FunSpec[P] {
     }
 
     It("should work when the exact error is checked"){
-      failingProgram shouldFail(Error(0))
+      failingProgram shouldFailWith(Error(0))
     }
 
     It("should work if error pattern is matched"){
@@ -65,7 +65,7 @@ object WorkingSpec{
     val S: WorkingProgram[P],
     val RE: RaiseError[P,PuretestError[Error]],
     val Tester: Tester[P,PuretestError[Error]])
-  extends scalatestImpl.ScalatestFunSpec[P,Error]
+  extends scalatestImpl.FunSpec[P,Error]
   with WorkingSpec[P]
 }
 
