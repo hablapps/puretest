@@ -4,11 +4,13 @@ package test
 import scalaz.syntax.monad._
 import WorkingProgram.Error
 
-trait ShouldSpec[P[_]] extends FunSpec[P,PuretestError[Error]] {
+trait ShouldSpec[P[_]] extends FunSpec[P] {
   val S: WorkingProgram[P]
   import S._
 
+  implicit val HE1: HandleError[P, PuretestError[Error]]
   implicit val RE1: RaiseError[P, PuretestError[Error]]
+  implicit val RE2: RaiseError[P, PuretestError[PuretestError[Error]]]
 
   Describe("ShouldFail should fail"){
     It("with working programs"){
@@ -82,9 +84,9 @@ trait ShouldSpec[P[_]] extends FunSpec[P,PuretestError[Error]] {
 object ShouldSpec{
   class Scalatest[P[_]](
     val S: WorkingProgram[P],
+    val HE1: HandleError[P, PuretestError[Error]],
     val RE1: RaiseError[P, PuretestError[Error]],
-    val HE: HandleError[P, PuretestError[Error]],
-    val RE: RaiseError[P, PuretestError[PuretestError[Error]]],
+    val RE2: RaiseError[P, PuretestError[PuretestError[Error]]],
     val Tester: Tester[P,PuretestError[PuretestError[Error]]])
   extends scalatestImpl.ScalatestFunSpec[P,PuretestError[Error]]
   with ShouldSpec[P]

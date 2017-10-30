@@ -4,10 +4,11 @@ package test
 import scalaz.{MonadState, MonadError}
 import scalaz.syntax.monad._
 
-trait BooleanPrograms[P[_]] extends FunSpec[P, Throwable] {
+trait BooleanPrograms[P[_]] extends FunSpec[P] {
 
   val MS: MonadState[P, Int]
   implicit val ME: MonadError[P, Throwable]
+  implicit val RE: RaiseError[P, PuretestError[Throwable]]
 
   def trueProgram: P[Boolean] = for {
     _ <- MS.put(1)

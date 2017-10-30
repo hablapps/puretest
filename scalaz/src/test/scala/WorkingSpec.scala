@@ -5,9 +5,11 @@ import scalaz.syntax.monadError._
 
 import WorkingProgram.Error
 
-trait WorkingSpec[P[_]] extends FunSpec[P,Error] {
+trait WorkingSpec[P[_]] extends FunSpec[P] {
   val S: WorkingProgram[P]
   import S._
+
+  implicit val RE: RaiseError[P,PuretestError[Error]]
 
   Describe("ShouldSucceed"){
 
@@ -61,7 +63,6 @@ trait WorkingSpec[P[_]] extends FunSpec[P,Error] {
 object WorkingSpec{
   class Scalatest[P[_]](
     val S: WorkingProgram[P],
-    val HE: HandleError[P,Error],
     val RE: RaiseError[P,PuretestError[Error]],
     val Tester: Tester[P,PuretestError[Error]])
   extends scalatestImpl.ScalatestFunSpec[P,Error]

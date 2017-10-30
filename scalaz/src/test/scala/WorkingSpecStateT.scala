@@ -9,7 +9,6 @@ import WorkingProgram.Error, WorkingSpecStateT.Program
 
 class WorkingSpecStateT extends WorkingSpec.Scalatest[Program](
   WorkingProgram[Program],
-  HandleError[Program,Error],
   RaiseError[Program,PuretestError[Error]],
   StateTester[Program,Int,PuretestError[Error]].apply(0)
 )

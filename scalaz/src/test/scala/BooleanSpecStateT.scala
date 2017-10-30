@@ -10,7 +10,6 @@ class BooleanSpecStateT extends BooleanSpec.Scalatest[Program](
   implicitly,
   implicitly,
   implicitly,
-  implicitly,
   StateTester[Program,Int,PuretestError[Throwable]].apply(0)
 )
 
