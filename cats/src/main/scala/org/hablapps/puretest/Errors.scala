@@ -23,7 +23,7 @@ trait PuretestErrorImplicits {
       ME: MonadError[P, PuretestError[E]]) =
     new MonadError[P, E] {
       def pure[A](a: A) = ME.pure(a)
-      def flatMap[A,B](p: P[A])(f: A => P[B]) = ME.flatMap(p)(f)
+      def flatMap[A, B](p: P[A])(f: A => P[B]) = ME.flatMap(p)(f)
       def tailRecM[A, B](a: A)(f: A => P[Either[A, B]]): P[B] = ME.tailRecM(a)(f)
       def raiseError[A](e: E) = ME.raiseError(ApplicationError(e))
       def handleErrorWith[A](fa: P[A])(f: E => P[A]): P[A] = ME.recoverWith(fa) {
@@ -60,5 +60,5 @@ case class NotMatched[A,E](found: A)(implicit location: Location)
 case class NotMatchedFailure[E](found: E)(implicit location: Location)
   extends PuretestError[E](s"Expected pattern doesn't match found error $found ${simplifyLocation(location)}")
 
-case class ShouldNotHappen[E](implicit location: Location)
+case class ShouldNotHappen[E]()(implicit location: Location)
   extends PuretestError[E](s"This error shouldn't ever be thrown ${simplifyLocation(location)}")

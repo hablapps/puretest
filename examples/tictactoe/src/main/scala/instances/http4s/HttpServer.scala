@@ -46,20 +46,14 @@ object HttpServer extends StreamApp[IO] {
 
   /* Auxiliary Methods */
 
-  private def handleError(pe: PuretestError[TicTacToe.Error]) =
-    pe match {
-      case ApplicationError(e) => BadRequest(e.asJson)
-      case other => InternalServerError(other.toString)
-    }
-
   private def handleTransformer[A](p: BoardState.Program[A]) =
     p.runS(currentBoard).fold(
-      handleError,
+      e => BadRequest(e.asJson),
       nextBoard => Ok { currentBoard = nextBoard })
 
   private def handleObserver[A](p: BoardState.Program[A])(implicit E: io.circe.Encoder[A]) =
     p.runA(currentBoard).fold(
-      handleError,
+      e => BadRequest(e.asJson),
       a => Ok(a.asJson))
 
   /* Entry point */

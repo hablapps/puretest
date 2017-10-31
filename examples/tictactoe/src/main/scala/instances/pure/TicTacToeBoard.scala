@@ -16,7 +16,7 @@ object BoardState {
 
   /* Auxiliary types */
 
-  type Program[T] = StateT[Either[PuretestError[Error], ?], BoardState, T]
+  type Program[T] = StateT[Either[Error, ?], BoardState, T]
 
   /* Auxiliary values */
 
@@ -30,7 +30,7 @@ object BoardState {
 
     /* Evidences */
 
-    val ME: MonadError[Program, Error] = PuretestError.toMonadError
+    val ME = MonadError[Program, Error]
 
     import StateT._
 
