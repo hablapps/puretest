@@ -62,8 +62,8 @@ trait WorkingSpec[P[_]] extends FunSpec[P] {
 object WorkingSpec{
   class Scalatest[P[_]](
     val S: WorkingProgram[P],
-    val RE: RaiseError[P,PuretestError[Error]],
-    val Tester: Tester[P,PuretestError[Error]])
-  extends scalatestImpl.FunSpec[P,Error]
+    val RE: RaiseError[P, PuretestError[Error]],
+    val Tester: Tester[P, PuretestError[Error]])
+  extends scalatestImpl.FunSpec[P, Error]
   with WorkingSpec[P]
 }

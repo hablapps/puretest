@@ -26,7 +26,7 @@ object BoardState {
 
   /* Instance */
 
-  object BoardTicTacToe extends TicTacToe[Program] {
+  object Instance extends TicTacToe[Program] {
 
     /* Evidences */
 

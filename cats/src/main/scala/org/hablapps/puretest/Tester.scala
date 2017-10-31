@@ -7,7 +7,7 @@ import cats.~>
  */
 trait Tester[P[_], E] extends (P ~> Either[E, ?])
 
-object Tester{
+object Tester {
   def apply[P[_], E](implicit T: Tester[P, E]) = T
 
   /* Testing Option programs */

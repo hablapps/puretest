@@ -1,5 +1,6 @@
 package org.hablapps.puretest.examples.tictactoe
 package test
+package pure
 
 import org.scalatest._
 import cats.instances.either._
@@ -9,7 +10,7 @@ import org.hablapps.puretest.ApplicationError
 
 class TicTacToeSpecNative extends FunSpec with Matchers {
   import TicTacToe._
-  import BoardState.BoardTicTacToe._
+  import BoardState.Instance._
 
   describe("Reset Spec") {
     it("First turn is X") {

@@ -31,7 +31,7 @@ trait TicTacToeSpec[P[_]] extends FunSpec[P] {
 
     It("Placing outside of the board is error") {
       reset >>
-      place(X, (5, 5)) shouldFailWith NotInTheBoard((5, 5)) // OccupiedPosition((1, 1))
+      place(X, (5, 5)) shouldFailWith NotInTheBoard((5, 5))
     }
 
     It("Placing in the wrong turn") {

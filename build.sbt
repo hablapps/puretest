@@ -9,7 +9,8 @@ lazy val commonSettings = Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4",
     "com.lihaoyi" %% "sourcecode" % "0.1.3"),
   resolvers ++= Seq(
-    "Speech repo - releases" at "http://repo.hablapps.com/releases"),
+    "Speech repo - releases" at "http://repo.hablapps.com/releases",
+    Resolver.sonatypeRepo("snapshots")),
   publishTo <<= version { v =>
     import java.io.File
     val privateKeyFile: File = new File(sys.env("HOME") + "/.ssh/hablaweb.pem")
@@ -66,4 +67,11 @@ lazy val tictactoe = (project in file("examples/tictactoe"))
     commonSettings,
     name := "tictactoe-example",
     publish := { },
-    publishLocal := { })
+    publishLocal := { },
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-dsl" % "0.18.0-SNAPSHOT",
+      "org.http4s" %% "http4s-blaze-server" % "0.18.0-SNAPSHOT",
+      "org.http4s" %% "http4s-blaze-client" % "0.18.0-SNAPSHOT",
+      "org.http4s" %% "http4s-circe" % "0.18.0-SNAPSHOT",
+      "io.circe" %% "circe-generic" % "0.9.0-M1",
+      "io.circe" %% "circe-literal" % "0.9.0-M1"))

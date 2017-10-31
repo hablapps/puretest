@@ -87,7 +87,7 @@ object ShouldSpec{
     val HE1: HandleError[P, PuretestError[Error]],
     val RE1: RaiseError[P, PuretestError[Error]],
     val RE2: RaiseError[P, PuretestError[PuretestError[Error]]],
-    val Tester: Tester[P,PuretestError[PuretestError[Error]]])
-  extends scalatestImpl.FunSpec[P,PuretestError[Error]]
+    val Tester: Tester[P, PuretestError[PuretestError[Error]]])
+  extends scalatestImpl.FunSpec[P, PuretestError[Error]]
   with ShouldSpec[P]
 }
