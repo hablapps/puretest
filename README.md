@@ -85,7 +85,7 @@ def testWithForC[P[_]: HandleError[?[_],Throwable]
   } yield ()
 ```
 
-where the for-comprehension is equivalent to the following testing expression:
+where the for-comprehension expression is equivalent to the following one:
 
 ```scala
 program shouldMatch{ case 1 => true; case _ => false } as(())
@@ -150,7 +150,9 @@ object Test{
 ```
 
 The `scalatestImpl.FunSpec` trait extends the ScalaTest `FunSpec` API, in such a way that an instance of
-`Test.ScalaTest` will be a regular ScalaTest test. Note that besides the evidences of the
+`Test.ScalaTest` will be a regular ScalaTest test. The abstract `Describe` and `It` instructions of puretest are implemented in terms of the ScalaTest `describe` and `it` operations of ScalaTest `FunSpec`, and simply check that the corresponding testing expressions run without errors.
+
+Note that besides the evidences of the
 test suite (`MonadError` and `RaiseError`), we also need a `Tester` instance for `P`. In
 essence, an evidence of `Tester[P[_],E]` is just a natural transformation `P ~> Either[E, ?]`.
 There are instances of this type class for some of the most common program types, these being:
@@ -237,9 +239,13 @@ MonadState program
 - should satisfy Put-Put law
 ```
 
-# Further examples
+# Examples & talks
 
 So far we have one example where you can see puretest in action. Don't waste any time and take a look at our awesome [TicTacToe](examples/tictactoe).
+
+Some events where we have talked about puretest:
+
+* Typelevel unconference - Lambda World 2017 ([slides](https://docs.google.com/presentation/d/141ZbZruGVlSa5cudUCizbLPDU9yB61AUENMWN3n9kCo/edit?usp=sharing))
 
 # Current status
 
