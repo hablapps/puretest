@@ -17,14 +17,14 @@ trait StateTMonadError{
       def bind[A, B](fa: StateT[F, S, A])(f: A => StateT[F, S, B]): StateT[F, S, B] =
         fa.flatMap(f)
 
-      def raiseError[A](e: E): StateT[F,S,A] =
+      def raiseError[A](e: E): StateT[F, S, A] =
         IndexedStateT(_ => F.raiseError(e))
 
-      def handleError[A](fa: StateT[F,S,A])(
-        f: E => StateT[F,S,A]): StateT[F,S,A] =
+      def handleError[A](fa: StateT[F, S, A])(
+        f: E => StateT[F, S, A]): StateT[F, S, A] =
           fa.mapsf(sf => (s: S) =>
             F.handleError(sf(s)){ e =>
-              val fe: F[S=>F[(S,A)]] = f(e).getF(F)
+              val fe: F[S=>F[(S, A)]] = f(e).getF(F)
               F.bind(fe)(ff => ff(s))
             }
           )

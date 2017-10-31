@@ -10,8 +10,7 @@ sealed abstract class PuretestError[E](msg: String){
   override def toString = msg
 }
 
-object PuretestError {
-
+object PuretestError extends PuretestErrorImplicits {
   def simplifyLocation(location: Location): String = {
     val fileext = raw".*/(.*)".r
     val filename = location._1.value match {
@@ -20,28 +19,23 @@ object PuretestError {
     }
     s"($filename:${location._2.value})"
   }
+}
 
-  def toPuretestError[E](e: E): PuretestError[E] =
-    ApplicationError(e)
-
-  def fromPuretestError[E](e: PuretestError[E]): Option[E] =
-    e match {
-      case ApplicationError(e) => Some(e)
-      case _ => None
-    }
-
+trait PuretestErrorImplicits {
   implicit def toMonadError[P[_],E](implicit
       ME: MonadError[P,PuretestError[E]]) =
     new MonadError[P,E]{
       def point[A](a: => A) = ME.point(a)
       def bind[A,B](p: P[A])(f: A => P[B]) = ME.bind(p)(f)
       def raiseError[A](e: E) =
-        ME.raiseError(toPuretestError(e))
+        ME.raiseError(ApplicationError(e))
       def handleError[A](p: P[A])(f: E => P[A]) =
-        ME.handleError(p){ e2 => fromPuretestError(e2) match {
-          case Some(e1) => f(e1)
-          case None => ME.raiseError(e2)
-        }}
+        ME.handleError(p) { e2 =>
+          e2 match {
+            case ApplicationError(e1) => f(e1)
+            case _ => ME.raiseError(e2)
+          }
+        }
     }
 }
 

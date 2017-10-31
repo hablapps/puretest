@@ -4,7 +4,7 @@ package test
 import scalaz.{MonadState, MonadError}
 import scalaz.syntax.monad._
 
-trait BooleanPrograms[P[_]] extends FunSpec[P] {
+trait BooleanPrograms[P[_]] {
 
   val MS: MonadState[P, Int]
   implicit val ME: MonadError[P, Throwable]

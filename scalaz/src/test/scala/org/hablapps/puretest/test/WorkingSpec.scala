@@ -50,7 +50,7 @@ trait WorkingSpec[P[_]] extends FunSpec[P] {
     }
 
     It("should work when the exact error is checked"){
-      failingProgram shouldFailWith(Error(0))
+      failingProgram shouldFailWith Error(0)
     }
 
     It("should work if error pattern is matched"){

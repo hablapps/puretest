@@ -1,7 +1,7 @@
 package org.hablapps.puretest
 package test
 
-import scalaz.syntax.monad._
+import cats.syntax.all._
 import WorkingProgram.Error
 
 trait ShouldSpec[P[_]] extends FunSpec[P] {
@@ -58,7 +58,7 @@ trait ShouldSpec[P[_]] extends FunSpec[P] {
     }
 
     It("if it doesn't match actual value"){
-      (MS.put(1) >> MS.get).shouldMatch[Error]{ _ == 2 }
+      (MS.set(1) >> MS.get).shouldMatch[Error]{ _ == 2 }
         .shouldFail[PuretestError[Error]]
     }
   }
@@ -75,7 +75,7 @@ trait ShouldSpec[P[_]] extends FunSpec[P] {
     }
 
     It("if it matches actual value"){
-      (MS.put(1) >> MS.get).shouldMatch[Error]{ _ == 1 }
+      (MS.set(1) >> MS.get).shouldMatch[Error]{ _ == 1 }
         .shouldBe[PuretestError[Error]](1)
     }
   }
@@ -91,6 +91,3 @@ object ShouldSpec{
   extends scalatestImpl.FunSpec[P,PuretestError[Error]]
   with ShouldSpec[P]
 }
-
-
-

@@ -8,7 +8,7 @@ import scalaz.syntax.monadError._
 
 import WorkingProgram.Error
 
-trait WorkingProgram[P[_]]{
+trait WorkingProgram[P[_]] {
 
   val MS: MonadState[P,Int]
   implicit val ME: MonadError[P,Error]

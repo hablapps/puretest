@@ -2,12 +2,12 @@ package org.hablapps.puretest
 package examples.tictactoe
 package test
 
-import scalatestImpl.ScalatestFunSpec
+import scalatestImpl.FunSpec
 import cats.instances.either._
 
 import BoardState.Program
 
-class BoardStateSpec extends ScalatestFunSpec[Program, TicTacToe.Error]
+class BoardStateSpec extends FunSpec[Program, TicTacToe.Error]
     with TicTacToeSpec[Program] {
 
   val ticTacToe = BoardState.BoardTicTacToe
