@@ -31,8 +31,11 @@ lazy val commonSettings = Seq(
     "-feature",
     "-language:implicitConversions",
     "-language:postfixOps",
-    "-language:higherKinds")
-  )
+    "-language:higherKinds"),
+  scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Ywarn-unused-import")),
+  scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
+)
+
 
 lazy val root = (project in file("."))
   .aggregate(cats, scalaz, tictactoe)

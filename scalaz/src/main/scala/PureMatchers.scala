@@ -47,7 +47,7 @@ class PureMatchers[P[_], A](self: P[A])(implicit
       RE: RaiseError[P, PuretestError[E]]): P[Unit] =
     shouldFail[E]((_:E) => true)(NotFailed(_), _ => ShouldNotHappen())
 
-  def shouldFail[E](e: E)(implicit
+  def shouldFailWith[E](e: E)(implicit
       HE: HandleError[P, E],
       RE: RaiseError[P, PuretestError[E]]): P[Unit] =
     shouldFail[E]((_:E) == e)(NotError(_, e), OtherError(_, e))

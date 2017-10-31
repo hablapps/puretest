@@ -1,9 +1,10 @@
-package org.hablapps.puretest
+package org.hablapps
+package puretest
 package scalatestImpl
 
-trait ScalatestFunSpec[P[_],E] extends org.scalatest.FunSpec
+trait FunSpec[P[_],E] extends org.scalatest.FunSpec
   with org.scalatest.Matchers
-  with FunSpec[P] {
+  with puretest.FunSpec[P] {
 
   implicit val Tester: Tester[P,PuretestError[E]]
 
