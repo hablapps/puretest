@@ -72,6 +72,25 @@ Matcher | Test pass iff
 `shouldFailWith[E](error: E)` | Program fails exactly with `error`
 `shouldMatchFailure[E](pattern: E => Boolean)` | Program fails and the error matches the specified pattern
 
+### For-comprehension syntax
+
+The `shouldMatch` pattern and some implicit declarations allows us to use for-comprehension syntax as follows:
+
+```scala
+def testWithForC[P[_]: HandleError[?[_],Throwable]
+                     : RaiseError[?[_],PuretestError[Throwable]]
+                     : Monad](program: P[Int]): P[Unit] =
+  for {
+    1 <- program
+  } yield ()
+```
+
+where the for-comprehension is equivalent to the following testing expression:
+
+```scala
+program shouldMatch{ case 1 => true; case _ => false } as(())
+```
+
 # Specification-style tests
 
 We can group and specify tests in a BDD style using the trait `FunSpec[P[_]]`.
