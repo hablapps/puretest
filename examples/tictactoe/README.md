@@ -1,5 +1,7 @@
 # TicTacToe example
 
+![Tic-tac-toe game](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Tic_tac_toe.svg/200px-Tic_tac_toe.svg.png)
+
 This is a more elavorated use case, where we start from a TicTacToe implementation in MTL style, and proceed to test its functionality using puretest.
 
 #### TicTacToe DSL
@@ -8,11 +10,9 @@ This is a more elavorated use case, where we start from a TicTacToe implementati
 trait TicTacToe[P[_]] {
 
   /* Evidences */
-
   implicit val ME: MonadError[P, Error]
 
   /* Primitive */
-
   def reset(): P[Unit]
   def place(stone: Stone, position: Position): P[Unit]
   def win(stone: Stone): P[Boolean]
@@ -20,93 +20,127 @@ trait TicTacToe[P[_]] {
   def turn(): P[Option[Stone]]
 
   /* Derived */
-
   def currentTurnIs(stone: Stone): P[Boolean] =
     turn() map { _ contains stone }
 }
 ```
 
-#### Defining its properties
+#### TicTacToe pure instance
 
-These are the properties, the laws our programs must obey, we use our TicTacToe DSL to build those properties, helped with yet tiny property DSL to be able to define predicates. This DSL has the instructions `isEqual` to match the result against a value, and `isError` to check that the program has ended with a concrete error.
+```scala
+case class BoardState(
+  board: Vector[Vector[Option[Stone]]],
+  turn: Stone)
+
+object BoardState {
+
+  /* Auxiliary types */
+  type Program[T] = StateT[Either[Error, ?], BoardState, T]
+
+  /* Auxiliary values */
+  val empty = BoardState(
+    board = Vector.fill(3)(Vector.fill(3)(None)),
+    turn = X)
+
+  /* Instance */
+  object Instance extends TicTacToe[Program] {
+    //...
+  }
+}
+```
+
+#### Defining tests
+
+These are the specs, the laws our programs must obey, we use our TicTacToe DSL to build those properties, helped with Puretest's pure matchers and `FunSpec`'s test definitions. This DSL has the instructions `shouldBe` to match the result against a value, and `shouldFailWith` to check that the program has ended with a concrete error, among other matchers.
 
 ```scala
 import org.hablapps.puretest._
 
-trait TicTacToeSpec[P[_]] {
+trait TicTacToeSpec[P[_]] extends FunSpec[P] {
 
   /* Evidences */
-
   val ticTacToe: TicTacToe[P]
+  implicit val RE: RaiseError[P, PuretestError[TicTacToe.Error]]
+
+  /* Tests */
   import ticTacToe._
 
-  /* Predicates */
+  Describe("Reset Spec") {
+    Holds("First turn is X") {
+      reset >>
+      currentTurnIs(X)
+    }
+  }
 
-  def firstTurnIsX: P[Boolean] =
-    reset >>
-    currentTurnIs(X)
+  Describe("Place Spec") {
+    It("should place stone in the specified location") {
+      for {
+        _ <- reset
+        None <- in((1, 1))
+        _ <- place(X, (1, 1))
+        Some(X) <- in((1, 1))
+      } yield ()
+    }
 
-  def placeMustSetStone: P[Boolean] =
-    reset >>
-    in((1, 1)).isEqual(Option.empty) >> // this doesn't work with the current implementation, but it should
-    place(X, (1, 1)) >>
-    in((1, 1)).isEqual(Option(X))
-
-  def occupiedPositionError: P[Boolean] =
-    reset >>
-    place(X, (1, 1)) >>
-    place(O, (1, 1)).isError[Error](OccupiedPosition((1, 1)))
+    It("should not be possible to place more than one stone at the same place") {
+      reset >>
+      place(X, (1, 1)) >>
+      place(O, (1, 1)) shouldFailWith OccupiedPosition((1, 1))
+    }
+  }
 }
 ```
 
-#### Binding properties to Scalatest
+#### Lifting programs to be tested
 
 ```scala
 import org.hablapps.puretest._, ProgramStateMatchers.Syntax._
 
-trait TicTacToeScalatestSpec[P[_]] extends TicTacToeSpec[P] {
-  self: FunSpec with Matchers =>
+object BoardStateTest {
 
-  /* Evidences */
+  /* Auxiliary types */
+  type Program[A] = StateT[Either[PuretestError[Error], ?], BoardState, A]
+  type Inner[A] = examples.tictactoe.BoardState.Program[A]
 
-  implicit val tester: StateTester[P, BoardState, TicTacToe.Error]
-
-  /* Initial state */
-
-  val initial = BoardState.empty
-
-  /* Tests */
-
-  describe("Reset Spec") {
-    it("first turn should be X") {
-      firstTurnIsX should from(initial).beSatisfied
-    }
+  /* Auxiliary values */
+  val Inner = examples.tictactoe.BoardState.Instance
+  val nat = new (Inner ~> Program) {
+    def apply[A](ia: Inner[A]): Program[A] =
+      StateT[Either[PuretestError[Error], ?], BoardState, A] { board =>
+        ia.run(board).left.map(ApplicationError(_))
+      }
   }
 
-  describe("Place Spec") {
-    it("should place a stone in the specified position") {
-      placeMustSetStone should from(initial).beSatisfied
-    }
+  /* Instance */
+  object Instance extends TicTacToe[Program] {
 
-    it("should not be possible to place more than one stone at the same place") {
-      occupiedPositionError should from(initial).beSatisfied
-    }
+    /* Evidences */
+    val ME: MonadError[Program, Error] = PuretestError.toMonadError
+
+    /* Transformers */
+    def reset: Program[Unit] = nat(Inner.reset)
+    def place(stone: Stone, position: Position): Program[Unit] = nat(Inner.place(stone, position))
+
+    /* Observers */
+    def in(position: Position): Program[Option[Stone]] = nat(Inner.in(position))
+    def turn: Program[Option[Stone]] = nat(Inner.turn)
+    def win(stone: Stone): Program[Boolean] = nat(Inner.win(stone))
   }
-
 }
 ```
 
-#### Instantiating the tests
+#### Instantiating the tests with Scalatest
 
 ```scala
 import org.hablapps.puretest._
+import scalatestImpl.FunSpec
+import BoardStateTest.Program
 
-class BoardStateSpec extends FunSpec with Matchers
-    with TicTacToeScalatestSpec[BoardState.Program]{
+class BoardStateSpec extends FunSpec[Program, TicTacToe.Error]
+    with TicTacToeSpec[Program] {
 
-  type Program[A] = StateT[Either[Error, ?], BoardState, A]
-
-  val ticTacToe = BoardState.BoardTicTacToe
-  val test = StateTester[Program, BoardState, Error]
+  val ticTacToe = BoardStateTest.Instance
+  val Tester = StateTester[Program, BoardState, PuretestError[Error]].apply(BoardState.empty)
+  val RE = RaiseError[Program, PuretestError[Error]]
 }
 ```

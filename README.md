@@ -23,6 +23,69 @@ libraryDependencies += "org.hablapps" %% "puretest-cats" % "0.3.1"
 libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.3.1"
 ```
 
+# What you're gonna get
+
+![Tic-tac-toe game](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Tic_tac_toe.svg/200px-Tic_tac_toe.svg.png)
+
+This is an example of how we can test a tagless final implementation of tic-tac-toe using puretest. The complete tic-tac-toe example can be found [here](examples/tictactoe).
+
+```scala
+import org.hablapps.puretest._
+
+trait TicTacToeSpec[P[_]] extends FunSpec[P] {
+
+  /* Evidences */
+
+  val ticTacToe: TicTacToe[P]
+  import ticTacToe._
+
+  implicit val RE: RaiseError[P, PuretestError[TicTacToe.Error]]
+
+  /* Tests */
+
+  Describe("Reset Spec") {
+
+    It("First turn is X") {
+      reset >>
+      currentTurnIs(X) shouldBe true
+    }
+
+  }
+
+  Describe("Place Spec") {
+
+    Holds("Turn must change") {
+      (reset >>
+        place(X, (1, 1)) >>
+        currentTurnIs(O)) &&
+      (place(O, (1, 2)) >>
+        currentTurnIs(X))
+    }
+
+    It("should place stone in the specified location") {
+      for {
+        _ <- reset
+        None <- in((1, 1))
+        _ <- place(X, (1, 1))
+        Some(X) <- in((1, 1))
+      } yield ()
+    }
+
+    It("should not be possible to place more than one stone at the same place") {
+      reset >>
+      place(X, (1, 1)) >>
+      place(O, (1, 1)) shouldFailWith OccupiedPosition((1, 1))
+    }
+  }
+}
+```
+
+First of all, note that these tests are fully general and work for any interpretation `P` of the `TicTacToe[P[_]]` system. They'll work if we instantiate it with the `State` monad, in order to do unit testing; and they'll work if we want to test a web service instance of `TicTacToe` based on `Future`s.
+
+Second, the tests build upon an abstract BDD style (`Describe`, `Holds` and `It`) and an abstract set of purely functional matchers (`shouldBe`, `shouldFailWith`, etc.). This allow us to abstract away from ScalaTest, Specs2, etc.
+
+In the following sections, we will describe these abstract components and will show how to run the tests with ScalaTest.
+
 # Purely functional matchers
 
 Matchers from conventional testing frameworks typically execute a given program and then checks whether the execution satisfied a given condition. If the condition is not met, then the matcher fails and an exception is thrown. Purely functional matchers work similarly, but in a more declarative fashion, and just for purely functional programs. Currently, support is provided only for purely functional programs written in a tagless-final style.
@@ -34,21 +97,21 @@ For instance, the following test checks that the given program returns successfu
 // in the following examples
 import org.hablapps.puretest._
 
-def testOne[P[_]: HandleError[?[_],Throwable]
-                : RaiseError[?[_],PuretestError[Throwable]]
+def testOne[P[_]: HandleError[?[_], Throwable]
+                : RaiseError[?[_], PuretestError[Throwable]]
                 : Monad](program: P[Int]): P[Int] =
   program shouldBe 1
 ```
 
 This test will pass if `program` actually executed without errors and the integer value returned is exactly `1`. If the program returned a different value, or it simply failed, then the test will fail as well and a testing error will be raised. This desired functionality is possible thanks to the following capabilities declared in the signature:
-* `HandleError[P,Throwable]`. It allows us to check wether the program failed or not. In this particular case, we assume that the application program fails with an error of type `Throwable`, but it could be any type you want.
-* `RaiseError[P,PuretestError[Throwable]]`. It allows us to raise a testing error in case that the test doesn't pass. The argument of `PuretestError` refers to the type of error of the program being tested.
+* `HandleError[P, Throwable]`. It allows us to check wether the program failed or not. In this particular case, we assume that the application program fails with an error of type `Throwable`, but it could be any type you want.
+* `RaiseError[P, PuretestError[Throwable]]`. It allows us to raise a testing error in case that the test doesn't pass. The argument of `PuretestError` refers to the type of error of the program being tested.
 
-`HandleError` and `RaiseError` are type classes which simply provide the corresponding operations of `MonadError`. The required evidences of these type classes can be obtained automatically from `MonadError[P,PuretestError[Throwable]]`.
+`HandleError` and `RaiseError` are type classes which simply provide the corresponding operations of `MonadError`. The required evidences of these type classes can be obtained automatically from `MonadError[P, PuretestError[Throwable]]`.
 
 For instance, if programs are to be interpreted as `Either` values, we may obtain the following outcomes:
 ```scala
-scala> type P[t] = Either[PuretestError[Throwable],t]
+scala> type P[A] = Either[PuretestError[Throwable], A]
 defined type alias P
 
 scala> testOne(1.point[P])
@@ -57,7 +120,7 @@ res0: P[Int] = Right(1)
 scala> testOne(0.point[P])
 res1: P[Int] = Left(Value 1 expected but found value 0 (<console>:18))
 
-scala> testOne((new Throwable()).raiseError[P,Int])
+scala> testOne((new Throwable()).raiseError[P, Int])
 res2: P[Int] = Left(Value 1 expected but found error java.lang.Throwable (<console>:18))
 ```
 
@@ -77,8 +140,8 @@ Matcher | Test pass iff
 The `shouldMatch` pattern and some implicit declarations allows us to use for-comprehension syntax as follows:
 
 ```scala
-def testWithForC[P[_]: HandleError[?[_],Throwable]
-                     : RaiseError[?[_],PuretestError[Throwable]]
+def testWithForC[P[_]: HandleError[?[_], Throwable]
+                     : RaiseError[?[_], PuretestError[Throwable]]
                      : Monad](program: P[Int]): P[Unit] =
   for {
     1 <- program
@@ -102,8 +165,8 @@ import org.hablapps.puretest._
 
 trait Test[P[_]] extends FunSpec[P]{
 
-  implicit val ME: MonadError[P,Throwable] // HandleError will be derived automatically from this
-  implicit val RE: RaiseError[P,PuretestError[Throwable]]
+  implicit val ME: MonadError[P, Throwable] // HandleError will be derived automatically from this
+  implicit val RE: RaiseError[P, PuretestError[Throwable]]
 
   Describe("Working program"){
     It("should succeed"){
@@ -113,21 +176,28 @@ trait Test[P[_]] extends FunSpec[P]{
     It("should succeed with the specific value"){
       1.point[P] shouldBe 2
     }
+
+    Holds("should succeed with boolean values"){
+      true.point[P]
+    }
   }
 
   Describe("Failing program"){
     It("should fail"){
-      (new Throwable()).raiseError[P,Int] shouldFail
+      (new Throwable()).raiseError[P, Int] shouldFail
     }
 
     It("should fail with the specific error thrown"){
-      (new Throwable("error")).raiseError[P,Int] shouldMatchFailure[Throwable]{
+      (new Throwable("error")).raiseError[P, Int] shouldMatchFailure[Throwable]{
         _.getMessage == "error2"
       }
     }
   }
 }
 ```
+
+The `Holds(...){ p }` style is used with boolean programs. It is essentially equivalent to
+`It(...){ p shouldBe true }`.
 
 # ScalaTest binding
 
@@ -140,12 +210,12 @@ resulting class for any interpretation we wish. ScalaTest is the only framework 
 For instance, the test suite above could be instantiated for ScalaTest as follows:
 
 ```scala
-object Test{
+object Test {
   class ScalaTest[P[_]](implicit
-    val ME: MonadError[P,Throwable],
-    val RE: RaiseError[P,PuretestError[Throwable]]
-    val Tester: Tester[P,PuretestError[Throwable]],
-  ) extends scalatestImpl.FunSpec[P,Throwable] with Test[P]
+    val ME: MonadError[P, Throwable],
+    val RE: RaiseError[P, PuretestError[Throwable]]
+    val Tester: Tester[P, PuretestError[Throwable]],
+  ) extends scalatestImpl.FunSpec[P, Throwable] with Test[P]
 }
 ```
 
@@ -154,17 +224,17 @@ The `scalatestImpl.FunSpec` trait extends the ScalaTest `FunSpec` API, in such a
 
 Note that besides the evidences of the
 test suite (`MonadError` and `RaiseError`), we also need a `Tester` instance for `P`. In
-essence, an evidence of `Tester[P[_],E]` is just a natural transformation `P ~> Either[E, ?]`.
+essence, an evidence of `Tester[P[_], E]` is just a natural transformation `P ~> Either[E, ?]`.
 There are instances of this type class for some of the most common program types, these being:
 
 * `Tester[Either[E, ?], E]`
 * `Tester[Future, Throwable]`
 * `Tester[Validated[E, ?], E]`
 
-So, creating a ScalaTest instance for type `Either[PuretestError[Throwable],?]` is really easy:
+So, creating a ScalaTest instance for type `Either[PuretestError[Throwable], ?]` is really easy:
 
 ```scala
-scala> object ScalatestTest extends Test.ScalaTest[Either[PuretestError[Throwable],?]]
+scala> object ScalatestTest extends Test.ScalaTest[Either[PuretestError[Throwable], ?]]
 defined object ScalatestTest
 
 scala> ScalatestTest.execute()
@@ -183,7 +253,7 @@ Failing program
 
 Some interpretations will require an initial state to run, and to that end we have another
 type class named `StateTester[P[_], S, E]`. This class is very similar to `Tester`;
-in fact it just offers a function that given an initial state `S` returns a regular `Tester[P,E]`.
+in fact it just offers a function that given an initial state `S` returns a regular `Tester[P, E]`.
 
 Same as with `Tester`, there are some basic instances already defined in puretest:
 
@@ -195,10 +265,10 @@ Here we show an example of a stateful specification and its instantiation for Sc
 ```scala
 import org.hablapps.puretest._
 
-trait StateTest[P[_]] extends FunSpec[P]{
-  implicit val MS: MonadState[P,Int]
-  implicit val HE: HandleError[P,Throwable]
-  implicit val RE: RaiseError[P,PuretestError[Throwable]]
+trait StateTest[P[_]] extends FunSpec[P] {
+  implicit val MS: MonadState[P, Int]
+  implicit val HE: HandleError[P, Throwable]
+  implicit val RE: RaiseError[P, PuretestError[Throwable]]
 
   Describe("MonadState program"){
     It("should satisfy Put-Get law"){
@@ -211,14 +281,14 @@ trait StateTest[P[_]] extends FunSpec[P]{
   }
 }
 
-object StateTest{
+object StateTest {
   class ScalaTest[P[_]](
-    val Tester: Tester[P,PuretestError[Throwable]]
+    val Tester: Tester[P, PuretestError[Throwable]]
   )(implicit
-    val MS: MonadState[P,Int],
-    val HE: HandleError[P,Throwable],
-    val RE: RaiseError[P,PuretestError[Throwable]],
-  ) extends scalatestImpl.FunSpec[P,Throwable] with StateTest[P]
+    val MS: MonadState[P, Int],
+    val HE: HandleError[P, Throwable],
+    val RE: RaiseError[P, PuretestError[Throwable]],
+  ) extends scalatestImpl.FunSpec[P, Throwable] with StateTest[P]
 }
 ```
 
@@ -226,10 +296,10 @@ And this is how we can run this test for an stateful interpretation (using `Stat
 obtain the corresponding `Tester` instance):
 
 ```scala
-scala> type P[t] = StateT[Either[PuretestError[Throwable],?],Int,t]
+scala> type P[A] = StateT[Either[PuretestError[Throwable], ?], Int, A]
 defined type alias P
 
-scala> object StateTestScalaTest extends StateTest.ScalaTest(StateTester[P,Int,PuretestError[Throwable]].apply(0))
+scala> object StateTestScalaTest extends StateTest.ScalaTest(StateTester[P, Int, PuretestError[Throwable]].apply(0))
 defined object StateTestScalaTest
 
 scala> StateTestScalaTest.execute()
