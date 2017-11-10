@@ -37,7 +37,7 @@ trait TicTacToe[P[_]] {
     turn map { _ contains stone }
 
   def simulate(Xmoves: Position*)(Omoves: Position*): P[Stone] =
-    reset >>
+    reset *>
     simulate(Xmoves.toList, X, Omoves.toList)
 
   def simulate(moves: List[Position],
@@ -47,7 +47,7 @@ trait TicTacToe[P[_]] {
       case Nil =>
         ME.raiseError(NotEnoughMoves)
       case m :: ms =>
-        place(stone, m) >>
+        place(stone, m) *>
         win(stone).ifM(
           stone.pure[P],
           simulate(opponent, stone.opponent, ms))

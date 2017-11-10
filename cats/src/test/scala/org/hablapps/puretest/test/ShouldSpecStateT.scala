@@ -4,6 +4,7 @@ package test
 import cats.MonadError
 import cats.data.StateT
 import cats.instances.either._
+import cats.mtl.instances.state._
 
 import WorkingProgram.Error, ShouldSpecStateT.Program
 import PuretestError._

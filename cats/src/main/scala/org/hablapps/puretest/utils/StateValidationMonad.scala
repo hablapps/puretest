@@ -41,7 +41,7 @@ trait StateValidatedMonad{
         State[S, Validated[E, B]] { s =>
           val (s1, maybea) = fa.run(s).value
           val (s2, maybefab) = ff.run(s1).value
-          (s2, (maybefab |@| maybea).map{ _(_) })
+          (s2, (maybefab, maybea).mapN{ _(_) })
         }
     }
 }

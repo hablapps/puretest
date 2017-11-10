@@ -9,15 +9,15 @@ import cats.instances.either._
 
 import TicTacToe._
 
-object BoardState {
+object BoardStateTest {
 
   /* Auxiliary types */
 
   type Program[A] = StateT[Either[PuretestError[Error], ?], BoardState, A]
+  type Inner[A] = examples.tictactoe.BoardState.Program[A]
 
   /* Auxiliary values */
 
-  type Inner[A] = examples.tictactoe.BoardState.Program[A]
   val Inner = examples.tictactoe.BoardState.Instance
   val nat = new (Inner ~> Program) {
     def apply[A](ia: Inner[A]): Program[A] =

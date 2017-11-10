@@ -1,7 +1,8 @@
 package org.hablapps.puretest
 package test
 
-import cats.{MonadState, MonadError}
+import cats.MonadError
+import cats.mtl.MonadState
 import cats.syntax.all._
 
 trait BooleanPrograms[P[_]] {
