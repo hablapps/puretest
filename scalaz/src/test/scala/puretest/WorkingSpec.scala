@@ -1,4 +1,4 @@
-package org.hablapps.puretest
+package puretest
 package test
 
 import scalaz.syntax.monadError._

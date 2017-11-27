@@ -1,4 +1,4 @@
-package org.hablapps.puretest
+package puretest
 
 trait StateValidationMonad{
   import scalaz.{Semigroup, Monad}, scalaz.{State, Validation}

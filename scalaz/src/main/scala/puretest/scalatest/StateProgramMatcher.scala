@@ -1,4 +1,4 @@
-package org.hablapps.puretest
+package puretest
 package scalatestImpl
 
 
@@ -13,7 +13,7 @@ object ProgramStateMatchers{
   trait Syntax{
     def beSatisfied[P[_],S](from: S)(implicit S1: ProgramStateMatchers[P,S]) =
       S1(from).beSatisfied
-    def runWithoutErrors[P[_],S](from: S)(implicit PM: ProgramStateMatchers[P,S]) = 
+    def runWithoutErrors[P[_],S](from: S)(implicit PM: ProgramStateMatchers[P,S]) =
       PM(from).runWithoutErrors
   }
 
@@ -21,7 +21,7 @@ object ProgramStateMatchers{
 
   implicit def matcher[P[_], S, E](implicit tester: StateTester[P,S,E]) =
     new ProgramStateMatchers[P,S]{
-      def apply(from: S) = 
+      def apply(from: S) =
         ProgramMatchers.matcher(tester(from))
     }
 }
