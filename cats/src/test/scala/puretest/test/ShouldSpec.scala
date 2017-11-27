@@ -15,7 +15,7 @@ trait ShouldSpec[P[_]] extends FunSpec[P] {
   Describe("ShouldFail should fail"){
     It("with working programs"){
       workingProgram.shouldFail[Error].
-        shouldFailWith[PuretestError[Error]](NotFailed[Error,Int](1)) >>
+        shouldFailWith[PuretestError[Error]](NotFailed[Error,Int](1)) *>
       (for {
         2 <- workingProgramWithHandledError
       } yield ()).shouldFail[Error].shouldFail[PuretestError[Error]]
@@ -58,7 +58,7 @@ trait ShouldSpec[P[_]] extends FunSpec[P] {
     }
 
     It("if it doesn't match actual value"){
-      (MS.set(1) >> MS.get).shouldMatch[Error]{ _ == 2 }
+      (MS.set(1) *> MS.get).shouldMatch[Error]{ _ == 2 }
         .shouldFail[PuretestError[Error]]
     }
   }
@@ -75,7 +75,7 @@ trait ShouldSpec[P[_]] extends FunSpec[P] {
     }
 
     It("if it matches actual value"){
-      (MS.set(1) >> MS.get).shouldMatch[Error]{ _ == 1 }
+      (MS.set(1) *> MS.get).shouldMatch[Error]{ _ == 1 }
         .shouldBe[PuretestError[Error]](1)
     }
   }

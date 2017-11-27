@@ -3,6 +3,7 @@ package test
 
 import cats.data.StateT
 import cats.instances.either._
+import cats.mtl.instances.state._
 
 import BooleanSpecStateT.Program
 import PuretestError._

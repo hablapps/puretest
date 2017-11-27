@@ -14,12 +14,12 @@ trait WorkingSpec[P[_]] extends FunSpec[P] {
   Describe("ShouldSucceed"){
 
     It("should work with working programs"){
-      workingProgram.shouldSucceed >>
+      workingProgram.shouldSucceed *>
       workingProgramWithHandledError.shouldSucceed
     }
 
     It("is redundant with working programs"){
-      workingProgram >>
+      workingProgram *>
       workingProgramWithHandledError
     }
 
@@ -28,8 +28,8 @@ trait WorkingSpec[P[_]] extends FunSpec[P] {
     }
 
     It("should work if patterns are matched"){
-      (workingProgramWithHandledError shouldMatch { _ == 2 }) >>
-      MS.set(2) >>
+      (workingProgramWithHandledError shouldMatch { _ == 2 }) *>
+      MS.set(2) *>
       MS.get shouldMatch { _ == 2 }
     }
 

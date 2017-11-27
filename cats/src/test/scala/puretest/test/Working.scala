@@ -1,7 +1,8 @@
 package puretest
 package test
 
-import cats.{MonadState, MonadError}
+import cats.MonadError
+import cats.mtl.MonadState
 import cats.syntax.all._
 
 /** Programs */
@@ -20,7 +21,7 @@ trait WorkingProgram[P[_]] {
     1.pure[P]
 
   def workingProgramWithHandledError: P[Int] =
-    1.pure[P] >>
+    1.pure[P] *>
     Error(1).raiseError[P, Int] handleError { _ => 2 }
 
   def failingProgram: P[Unit] =
