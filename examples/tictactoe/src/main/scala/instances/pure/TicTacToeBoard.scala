@@ -1,4 +1,4 @@
-package org.hablapps.puretest
+package puretest
 package examples.tictactoe
 
 import TicTacToe._

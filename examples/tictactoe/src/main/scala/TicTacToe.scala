@@ -1,4 +1,4 @@
-package org.hablapps.puretest.examples.tictactoe
+package puretest.examples.tictactoe
 
 import cats.MonadError
 import cats.syntax.all._

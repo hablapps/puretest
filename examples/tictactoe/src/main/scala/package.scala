@@ -1,4 +1,4 @@
-package org.hablapps.puretest.examples
+package puretest.examples
 
 import cats.{Apply, Monad}
 import cats.syntax.all._

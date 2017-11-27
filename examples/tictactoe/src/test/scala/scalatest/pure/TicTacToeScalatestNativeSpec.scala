@@ -1,4 +1,4 @@
-package org.hablapps.puretest.examples.tictactoe
+package puretest.examples.tictactoe
 package test
 package pure
 
@@ -6,8 +6,8 @@ import org.scalatest._
 import cats.instances.either._
 import cats.syntax.all._
 
-import org.hablapps.puretest.ApplicationError
-import org.hablapps.puretest.examples.tictactoe.BoardState.{empty => emptyBoard}
+import puretest.ApplicationError
+import puretest.examples.tictactoe.BoardState.{empty => emptyBoard}
 
 class TicTacToeSpecNative extends FunSpec with Matchers {
   import TicTacToe._
