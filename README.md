@@ -320,9 +320,8 @@ Some events where we have talked about puretest:
 # Current status
 
 Puretest is very much in progress right now, so contributions are welcome. Some of the areas that need urgent attention are the following ones:
-* Support for testing purely functional programs using GADTs (scalaz/cats Free, Eff, etc.)
+* Support for testing purely functional programs using GADTs (scalaz/cats Free, freestyle's @free, Eff, etc.)
 * Integrations with Specs2, uTest, and other testing frameworks
-* Upgrade to cats 1.0
 
 # License
 
