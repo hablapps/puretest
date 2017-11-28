@@ -19,8 +19,8 @@ To add Puretest to your project and start using it, you just need to add our res
 ```scala
 resolvers += "Habla repo - releases" at "http://repo.hablapps.com/releases"
 
-libraryDependencies += "org.hablapps" %% "puretest-cats" % "0.3.1"
-libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.3.1"
+libraryDependencies += "org.hablapps" %% "puretest-cats" % "0.3.2"
+libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.3.2"
 ```
 
 # What you're gonna get
@@ -30,7 +30,7 @@ libraryDependencies += "org.hablapps" %% "puretest-scalaz" % "0.3.1"
 This is an example of how we can test a tagless final implementation of tic-tac-toe using puretest. The complete tic-tac-toe example can be found [here](examples/tictactoe).
 
 ```scala
-import org.hablapps.puretest._
+import puretest._
 
 trait TicTacToeSpec[P[_]] extends FunSpec[P] {
 
@@ -95,7 +95,7 @@ For instance, the following test checks that the given program returns successfu
 ```scala
 // The corresponding scalaz or cats dependencies are assumed to be in scope
 // in the following examples
-import org.hablapps.puretest._
+import puretest._
 
 def testOne[P[_]: HandleError[?[_], Throwable]
                 : RaiseError[?[_], PuretestError[Throwable]]
@@ -161,7 +161,7 @@ Basically, this trait gives us the possibility to assign textual descriptions to
 as follows:
 
 ```scala
-import org.hablapps.puretest._
+import puretest._
 
 trait Test[P[_]] extends FunSpec[P]{
 
@@ -263,7 +263,7 @@ Same as with `Tester`, there are some basic instances already defined in puretes
 Here we show an example of a stateful specification and its instantiation for ScalaTest:
 
 ```scala
-import org.hablapps.puretest._
+import puretest._
 
 trait StateTest[P[_]] extends FunSpec[P] {
   implicit val MS: MonadState[P, Int]

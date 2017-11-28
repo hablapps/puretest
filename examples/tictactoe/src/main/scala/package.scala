@@ -1,4 +1,4 @@
-package org.hablapps.puretest.examples
+package puretest.examples
 
 import cats.{Apply, Monad}
 import cats.syntax.all._
@@ -14,7 +14,7 @@ package object tictactoe {
       self.ifM(p.map(Option.apply), Option.empty.pure[P])
 
     def &&(other: P[Boolean])(implicit M: Apply[P]): P[Boolean] = // scalastyle:ignore
-      (self |@| other).map(_ && _)
+      (self, other).mapN(_ && _)
   }
 
 }

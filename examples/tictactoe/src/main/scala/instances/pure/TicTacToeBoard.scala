@@ -1,4 +1,4 @@
-package org.hablapps.puretest
+package puretest
 package examples.tictactoe
 
 import TicTacToe._
@@ -40,16 +40,16 @@ object BoardState {
       set(empty)
 
     def place(stone: Stone, position: Position): Program[Unit] =
-      checkOutsideBoard(position) >>
-      checkTurnIs(stone) >>
-      checkOccupied(position) >>
-      setStone(position, stone) >>
+      checkOutsideBoard(position) *>
+      checkTurnIs(stone) *>
+      checkOccupied(position) *>
+      setStone(position, stone) *>
       setTurn(stone.opponent)
 
     /* Observers */
 
     def in(position: Position): Program[Option[Stone]] =
-      checkOutsideBoard(position) >>
+      checkOutsideBoard(position) *>
       inspect(_.board(position._1)(position._2))
 
     def turn: Program[Option[Stone]] =

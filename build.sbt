@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "org.hablapps",
-  version := "0.3.2-SNAPSHOT",
+  version := "0.3.2",
   scalaVersion := "2.12.3",
   crossScalaVersions := Seq("2.11.8", "2.12.3"),
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
@@ -50,7 +50,8 @@ lazy val cats = project
     commonSettings,
     name := "puretest-cats",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats" % "0.9.0"
+      "org.typelevel" %% "cats-core" % "1.0.0-RC1",
+      "org.typelevel" %% "cats-mtl-core" % "0.1.0" % "test"
     ))
 
 lazy val scalaz = project
@@ -69,9 +70,10 @@ lazy val tictactoe = (project in file("examples/tictactoe"))
     publish := { },
     publishLocal := { },
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-dsl" % "0.18.0-SNAPSHOT",
-      "org.http4s" %% "http4s-blaze-server" % "0.18.0-SNAPSHOT",
-      "org.http4s" %% "http4s-blaze-client" % "0.18.0-SNAPSHOT",
-      "org.http4s" %% "http4s-circe" % "0.18.0-SNAPSHOT",
+      "org.typelevel" %% "cats-mtl-core" % "0.1.0" % "test",
+      "org.http4s" %% "http4s-dsl" % "0.18.0-M5",
+      "org.http4s" %% "http4s-blaze-server" % "0.18.0-M5",
+      "org.http4s" %% "http4s-blaze-client" % "0.18.0-M5",
+      "org.http4s" %% "http4s-circe" % "0.18.0-M5",
       "io.circe" %% "circe-generic" % "0.9.0-M1",
       "io.circe" %% "circe-literal" % "0.9.0-M1"))
