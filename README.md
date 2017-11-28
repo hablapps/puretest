@@ -130,7 +130,7 @@ Matcher | Test pass iff
 --- | ---
 `shouldSucceed[E]` | Program executes without errors of type `E`
 `shouldBe[E](value: A)` | Program returns successfully the specified `value`
-`shouldMatch[E](pattern: A => Boolean)` | Program returns successfully a value that match the specified pattern
+`shouldMatch[E](pattern: A => Boolean)` | Program returns successfully a value that matches the specified pattern
 `shouldFail[E]` | Program fails with an error of type E
 `shouldFailWith[E](error: E)` | Program fails exactly with `error`
 `shouldMatchFailure[E](pattern: E => Boolean)` | Program fails and the error matches the specified pattern
