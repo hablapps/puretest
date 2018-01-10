@@ -6,5 +6,11 @@ scala:
 jdk:
   - oraclejdk8
 
+before_script:
+  - sbt 'project tictactoe' run < /dev/null > /dev/null 2>&1 & SERVER_PID=$!
+
 script:
   - sbt test
+
+after_script:
+  - kill $SERVER_PID
