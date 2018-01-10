@@ -1,0 +1,27 @@
+language: scala
+
+scala:
+  - 2.12.3
+
+jdk:
+  - oraclejdk8
+
+before_script:
+  - sbt 'project tictactoe' run < /dev/null > /dev/null 2>&1 & SERVER_PID=$!
+
+script:
+  - sbt test
+
+after_script:
+  - kill $SERVER_PID
+
+cache:
+  directories:
+  - $HOME/.sbt/0.13/dependency
+  - $HOME/.sbt/boot/scala*
+  - $HOME/.sbt/launchers
+  - $HOME/.ivy2/cache
+
+before_cache:
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
